@@ -1,0 +1,51 @@
+#! /usr/bin/env bash
+
+set -eu
+
+function usage {
+    echo "$(basename $0)"
+    echo "  -h | help"
+    echo "  -n | docker container name"
+    echo "  -U | postgres user"
+    echo "  -W | postgres password"
+    echo "  -d | postgres database"
+}
+
+NAME="postgres-base"
+
+POSTGRES_DATABASE="postgres"
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="postgres"
+
+while getopts ":hd:n:U:W:d:R:" arg; do
+    case ${arg} in
+	h)
+	    usage
+	    exit 0
+	    ;;
+	n)
+	    NAME="${OPTARG}"
+	    ;;
+	U)
+	    POSTGRES_USER="${OPTARG}"
+	    ;;
+	W)
+	    POSTGRES_PASSWORD="${OPTARG}"
+	    ;;
+	d)
+	    POSTGRES_DATABASE="${OPTARG}"
+	    ;;
+	?)
+	echo "Invalid option: -${OPTARG}."
+	exit 2
+	;;
+    esac
+done
+
+docker run -it --rm \
+       -d -P --network host \
+       --name "${NAME}" \
+       -e POSTGRES_USER="${POSTGRES_USER}" \
+       -e POSTGRES_DATABASE="${POSTGRES_DATABASE}" \
+       -e POSTGRES_PASSWORD="${POSTGRES_PASSWORD}" \
+       postgres
